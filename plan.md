@@ -25,4 +25,13 @@ OOP:
 Above and beyond:
     matplotlib for data visualization
     sqlite for local data storage
-    
+
+
+File structure:
+    Root:
+        1.statement_parse.py
+        2.main.py
+        3.db.sqlite
+        4.Statement folder:
+            Month folder:
+                Statements...
