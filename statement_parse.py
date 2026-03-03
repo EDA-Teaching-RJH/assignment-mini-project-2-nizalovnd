@@ -26,7 +26,7 @@ settings_capital = {
 settings_nationwide = {
     "vertical_strategy": "explicit",
     "horizontal_strategy": "lines",
-    "explicit_vertical_lines": [53, 86, 252, 307, 363],  # Date | Description | Amount
+    "explicit_vertical_lines": [53, 86, 252, 307, 363], 
     "snap_tolerance": 5,
     "intersection_y_tolerance": 10,
     "explicit_horizontal_lines": [190, 472 ]
@@ -34,12 +34,19 @@ settings_nationwide = {
 settings_natwest = {
     "vertical_strategy": "explicit",
     "horizontal_strategy": "lines",
-    "explicit_vertical_lines": [55, 94, 359, 396, 462],  # Date | Description | Amount
+    "explicit_vertical_lines": [55, 94, 359, 396, 462], 
     "snap_tolerance": 5,
     "intersection_y_tolerance": 10,
     #"explicit_horizontal_lines": [190, 472 ]
 }
-
+settings_revolut = {
+    "vertical_strategy": "explicit",
+    "horizontal_strategy": "lines",
+    "explicit_vertical_lines": [40, 94, 329, 396, 462],  
+    "snap_tolerance": 5,
+    "intersection_y_tolerance": 10,
+    "explicit_horizontal_lines": [ 732 ]
+}
 
 class Transaction():
     def __init__(self, date,  account, amount):
@@ -88,26 +95,130 @@ def file_rename():
             print("Unknown Statement")
             continue
 
+class PageFilter():
+    def keep(self, page):
+        pass
+
+class AquaFilter(PageFilter):
+    def keep(self, page, i):
+        if i == 0:
+            return False
+        page_text = page.extract_text()
+        if "Your account in detail" not in page_text or "Your interest rates" in page_text:
+            return False
+        else:
+            return True
+
+        
+class CapitalFilter(PageFilter):
+    def keep(self, page, i):
+        if i == 0:
+            return False
+        else:
+            return True
+        
+class NationwideFilter(PageFilter):
+    def keep(self, page, i):
+        page_text = page.extract_text()
+        if "Balance from statement" not in page_text:
+            return False
+        else:
+            return True
+
+class NatwestFilter(PageFilter):
+    def keep(self, page, i):
+        page_text = page.extract_text()
+        if "Dispute Resolution" in page_text:
+            return False
+        else:
+            return True
+class RevolutFilter(PageFilter):
+    def keep(self, page, i):
+        return True
+
+class PDFProcessor():
+    def __init__ (self, filter: PageFilter, table_settings):
+        self.filter = filter
+        self.table_settings = table_settings
+    
+    def process_pdf(self, file_path):
+        intermediate_list = []
+        #json_filename = "db1.json"
+        with pdfplumber.open(file_path) as pdf:
+            for i, page in enumerate(pdf.pages):
+                if not self.filter.keep(page, i):
+                    continue
+                table = page.extract_table(table_settings=self.table_settings)
+                intermediate_list.append(table)
+
+        return intermediate_list
 
 
-def pdf_to_json(file_path):
-    #new json file for this file
-    intermediate_list = []
-    json_filename = "db1.json"
-    with pdfplumber.open(file_path) as pdf:
-        for i, page in enumerate(pdf.pages):
-            if i == 0:
+class TableFilter():
+    def keep(list):
+        pass
+
+class AquaTableFilter(TableFilter):
+    def keep(list):
+        if re.search(r"^\d+\s[a-zA-Z]{3}\s20\d{2}",list[0]):
+            return True
+        else:
+            return False
+
+class CapitalTableFilter(TableFilter):
+    def keep(list):
+        if re.search(r"^\d+\s[a-zA-Z]{3}",list[0]):
+            return True
+        else:
+            return False
+
+class NationwideTableFilter(TableFilter):
+    def keep(list):
+        if re.search(r"\d+.\d{2}$", list[2]) or re.search(r"\d+.\d{2}$", list[3]):
+            return True
+        else:
+            return False
+
+
+
+class NatwestTableFilter(TableFilter):
+    def keep(list):
+        if re.search(r"\d+.\d{2}$", list[2]) or re.search(r"\d+.\d{2}$", list[3]):
+            return True
+        else:
+            return False
+
+
+class RevolutTableFilter(TableFilter):
+    def keep(list):
+        if re.search(r"^\d+\s[a-zA-Z]{3}\s20\d{2}",list[0]):
+            return True
+        else:
+            return False
+
+class TableProcessor():
+    def __init__(self, filter: TableFilter):
+        self.filter = filter
+
+    def process(self, table):
+        intermediate_list = []
+        for sublist in table:
+            if not self.filter.keep(sublist):
                 continue
-            page_text = page.extract_text()
-            if "Your account in detail" not in page_text or "Your interest rates" in page_text:
-                break
-            table = page.extract_table(table_settings=settings_aqua)
-            intermediate_list.append(table)
+            else:
+                intermediate_list.append(sublist)
+        return intermediate_list
 
-    try:
-        with open(json_filename, "w") as file:
-            json.dump(intermediate_list, file, )
-    except IOError:
-        print("Error writing json file")
 
+"""
+        try:
+            with open(json_filename, "w") as file:
+                json.dump(intermediate_list, file, )
+        except IOError:
+            print("Error writing json file")
+"""
+
+
+
+    
 

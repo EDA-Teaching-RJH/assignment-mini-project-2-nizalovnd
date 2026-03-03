@@ -10,7 +10,7 @@ Provide projection of financial state for next 3 months based on revious month s
 
 Assignment requirements:
 Regex:
-    Statement parsing and categorization
+    Statement parsing and categorization +
 Testing:
     mainly the testing of regex with edge cases (test projection functionality too)
 Libraries:
@@ -35,3 +35,11 @@ File structure:
         4.Statement folder:
             Month folder:
                 Statements...
+
+
+Process:
+    move statements into statements foler
+    rename files
+    pdf to extracted tables process
+    process tables
+    
