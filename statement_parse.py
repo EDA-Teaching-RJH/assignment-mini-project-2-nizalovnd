@@ -9,12 +9,36 @@ base_dir = Path.cwd()
 settings_aqua = {
     "vertical_strategy": "explicit",
     "horizontal_strategy": "lines",
-    "explicit_vertical_lines": [28, 95, 500, 568],  # Date | Description | Amount
+    "explicit_vertical_lines": [28, 95, 500, 568],
     "snap_tolerance": 5,
     "intersection_y_tolerance": 10,
     "explicit_horizontal_lines": [795]
 }
+settings_capital = {
+    "vertical_strategy": "explicit",
+    "horizontal_strategy": "lines",
+    "explicit_vertical_lines": [43, 72, 295, 355, 395], 
+    "snap_tolerance": 5,
+    "intersection_y_tolerance": 10,
+    "explicit_horizontal_lines": [190, 472 ]
+}
 
+settings_nationwide = {
+    "vertical_strategy": "explicit",
+    "horizontal_strategy": "lines",
+    "explicit_vertical_lines": [53, 86, 252, 307, 363],  # Date | Description | Amount
+    "snap_tolerance": 5,
+    "intersection_y_tolerance": 10,
+    "explicit_horizontal_lines": [190, 472 ]
+}
+settings_natwest = {
+    "vertical_strategy": "explicit",
+    "horizontal_strategy": "lines",
+    "explicit_vertical_lines": [55, 94, 359, 396, 462],  # Date | Description | Amount
+    "snap_tolerance": 5,
+    "intersection_y_tolerance": 10,
+    #"explicit_horizontal_lines": [190, 472 ]
+}
 
 
 class Transaction():
