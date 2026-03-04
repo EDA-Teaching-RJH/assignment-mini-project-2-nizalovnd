@@ -1,6 +1,7 @@
 import pdfplumber
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 
 base_dir = Path.cwd()
@@ -49,19 +50,21 @@ settings_revolut = {
 }
 
 class Transaction():
-    def __init__(self, date,  account, amount):
+    def __init__(self, date, name, account, amount):
         self.date = date
+        self.name = name
         self.account = account
         self.amount = amount
 
 class Income(Transaction):
-    def __init__(self, date, account, amount, name):
-        super.__init__(date, account, amount)
-        self.name = name
+    def __init__(self, date, name, account, amount):
+        super.__init__(date, name, account, amount)
+        
 
 class Expense(Transaction):
-    def __init__(self, date, account, amount, category, card_type):
-        super.__init__(date, account, amount)
+    def __init__(self, date, name, account, amount, category, card_type):
+        super.__init__(date, name, account, amount)
+    
         self.category = category
         self.card_type = card_type
 
@@ -208,6 +211,76 @@ class TableProcessor():
             else:
                 intermediate_list.append(sublist)
         return intermediate_list
+
+
+class RowToObject():
+    def transaction(row) -> Transaction:
+        pass
+
+class AquaTransaction(RowToObject):
+    def transactin(row):
+        date_old = row[0]
+        date_new = datetime.strptime(date_old, "%d %b %Y")
+        name = row[1]
+        amount_old = re.match(r"\d+.\d{2}", row[2])
+        amount_new = float(amount_old) * -1
+        expense = Expense(date_new, name, amount_new, "expense", "credit")
+        return expense
+
+class CapitalTransaction(RowToObject):
+    def transactin(row):
+        date_old = row[0]
+        date_new = datetime.strptime(date_old, "%d %b")
+        name = row[1]
+        if not row[3] == "":
+
+            amount_old = re.match(r"\d+.\d{2}", row[3])
+            amount_new = float(amount_old) * -1
+            expense = Expense(date_new, name, amount_new, "expense", "credit")
+            return expense
+
+class NatwestTransaction(RowToObject):
+    def transaction():
+        #need logic for replicating date for same day transactions
+
+class NationwideTransaction(RowToObject):
+    def transactin(row):
+        date_old = row[0]
+        date_new = datetime.strptime(date_old, "%d %b")
+        name = row[1]
+        if not row[2] == "":
+
+            amount_old = re.match(r"\d+.\d{2}", row[2])
+            amount_new = float(amount_old)
+            income = Income(date_new, name, amount_new)
+            return income
+        
+        if not row[3] == "":
+
+            amount_old = re.match(r"\d+.\d{2}", row[3])
+            amount_new = float(amount_old) * -1
+            expense = Expense(date_new, name, amount_new, "expense", "debit")
+            return expense
+
+class RevolutTransaction(RowToObject):
+    def transactin(row):
+        date_old = row[0]
+        date_new = datetime.strptime(date_old, "%d %b %Y")
+        name = row[1]
+        if not row[2] == "":
+
+            amount_old = re.match(r"\d+.\d{2}", row[2])
+            amount_new = float(amount_old)
+            income = Income(date_new, name, amount_new)
+            return income
+        
+        if not row[3] == "":
+
+            amount_old = re.match(r"\d+.\d{2}", row[3])
+            amount_new = float(amount_old) * -1
+            expense = Expense(date_new, name, amount_new, "expense", "debit")
+            return expense
+
 
 
 """
