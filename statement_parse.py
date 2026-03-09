@@ -37,8 +37,7 @@ settings_natwest = {
     "horizontal_strategy": "lines",
     "explicit_vertical_lines": [55, 94, 359, 396, 462], 
     "snap_tolerance": 5,
-    "intersection_y_tolerance": 10,
-    #"explicit_horizontal_lines": [190, 472 ]
+    "intersection_y_tolerance": 10
 }
 settings_revolut = {
     "vertical_strategy": "explicit",
@@ -58,12 +57,12 @@ class Transaction():
 
 class Income(Transaction):
     def __init__(self, date, name, account, amount):
-        super.__init__(date, name, account, amount)
+        super().__init__(date, name, account, amount)
         
 
 class Expense(Transaction):
     def __init__(self, date, name, account, amount, category, card_type):
-        super.__init__(date, name, account, amount)
+        super().__init__(date, name, account, amount)
     
         self.category = category
         self.card_type = card_type
@@ -158,25 +157,25 @@ class PDFProcessor():
 
 
 class TableFilter():
-    def keep(list):
+    def keep(self, list):
         pass
 
 class AquaTableFilter(TableFilter):
-    def keep(list):
+    def keep(self, list):
         if re.search(r"^\d+\s[a-zA-Z]{3}\s20\d{2}",list[0]):
             return True
         else:
             return False
 
 class CapitalTableFilter(TableFilter):
-    def keep(list):
+    def keep(self, list):
         if re.search(r"^\d+\s[a-zA-Z]{3}",list[0]):
             return True
         else:
             return False
 
 class NationwideTableFilter(TableFilter):
-    def keep(list):
+    def keep(self, list):
         if re.search(r"\d+.\d{2}$", list[2]) or re.search(r"\d+.\d{2}$", list[3]):
             return True
         else:
@@ -185,7 +184,7 @@ class NationwideTableFilter(TableFilter):
 
 
 class NatwestTableFilter(TableFilter):
-    def keep(list):
+    def keep(self, list):
         if re.search(r"\d+.\d{2}$", list[2]) or re.search(r"\d+.\d{2}$", list[3]):
             return True
         else:
@@ -193,7 +192,7 @@ class NatwestTableFilter(TableFilter):
 
 
 class RevolutTableFilter(TableFilter):
-    def keep(list):
+    def keep(self, list):
         if re.search(r"^\d+\s[a-zA-Z]{3}\s20\d{2}",list[0]):
             return True
         else:
@@ -214,73 +213,105 @@ class TableProcessor():
 
 
 class RowToObject():
-    def transaction(row) -> Transaction:
+    def transaction(self, row) -> Transaction:
         pass
 
 class AquaTransaction(RowToObject):
-    def transactin(row):
+    def transaction(self, row):
         date_old = row[0]
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
-        amount_old = re.match(r"\d+.\d{2}", row[2])
-        amount_new = float(amount_old) * -1
-        expense = Expense(date_new, name, amount_new, "expense", "credit")
+        amount_old = re.match(r"\d+\.\d{2}", row[2])
+        if amount_old:
+            amount_new = float(amount_old.group()) * -1
+        expense = Expense(date_new, name, "Aqua", amount_new, "expense", "credit")
         return expense
 
 class CapitalTransaction(RowToObject):
-    def transactin(row):
+    def transaction(self, row):
         date_old = row[0]
         date_new = datetime.strptime(date_old, "%d %b")
         name = row[1]
         if not row[3] == "":
 
-            amount_old = re.match(r"\d+.\d{2}", row[3])
-            amount_new = float(amount_old) * -1
-            expense = Expense(date_new, name, amount_new, "expense", "credit")
+            amount_old = re.match(r"\d+\.\d{2}", row[3])
+            if amount_old:
+                amount_new = float(amount_old.group()) * -1
+            expense = Expense(date_new, name, "Capital", amount_new, "expense", "credit")
             return expense
 
 class NatwestTransaction(RowToObject):
-    def transaction():
+    #this clss needs to persists over all transactions in the natwest statement, so that there is a variable last seen date that can fill in the date for transactions that have the date cell blank
+    def __init__(self):
+        self.last_date = None
+
+    def transaction(self, row):
+        if row[0] != "":
+            self.last_date = datetime.strptime(row[0], "%d %b")
+        if self.last_date == None:
+            return None
+        name = row[1]
+        if not row[2] == "":
+
+            amount_old = re.match(r"\d+\.\d{2}", row[2])
+            if amount_old:
+                amount_new = float(amount_old.group())
+            income = Income(self.last_date, name, "Natwest", amount_new)
+            return income
+        
+        if not row[3] == "":
+
+            amount_old = re.match(r"\d+\.\d{2}", row[3])
+            if amount_old:
+                amount_new = float(amount_old.group()) * -1
+            expense = Expense(self.last_date, name, "Natwest", amount_new, "expense", "debit")
+            return expense
         #need logic for replicating date for same day transactions
 
 class NationwideTransaction(RowToObject):
-    def transactin(row):
+    def transaction(self, row):
         date_old = row[0]
         date_new = datetime.strptime(date_old, "%d %b")
         name = row[1]
         if not row[2] == "":
 
-            amount_old = re.match(r"\d+.\d{2}", row[2])
-            amount_new = float(amount_old)
-            income = Income(date_new, name, amount_new)
+            amount_old = re.match(r"\d+\.\d{2}", row[2])
+            if amount_old:
+                amount_new = float(amount_old.group())
+            income = Income(date_new, name, "Nationwide", amount_new)
             return income
         
         if not row[3] == "":
 
-            amount_old = re.match(r"\d+.\d{2}", row[3])
-            amount_new = float(amount_old) * -1
-            expense = Expense(date_new, name, amount_new, "expense", "debit")
+            amount_old = re.match(r"\d+\.\d{2}", row[3])
+            if amount_old:
+                amount_new = float(amount_old.group()) * -1
+            expense = Expense(date_new, name, "Nationwide", amount_new, "expense", "debit")
             return expense
 
 class RevolutTransaction(RowToObject):
-    def transactin(row):
+    def transaction(self, row):
         date_old = row[0]
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
         if not row[2] == "":
 
-            amount_old = re.match(r"\d+.\d{2}", row[2])
-            amount_new = float(amount_old)
-            income = Income(date_new, name, amount_new)
+            amount_old = re.match(r"\d+\.\d{2}", row[2])
+            if amount_old:
+                amount_new = float(amount_old.group())
+            income = Income(date_new, name, "Revolut", amount_new)
             return income
         
         if not row[3] == "":
 
-            amount_old = re.match(r"\d+.\d{2}", row[3])
-            amount_new = float(amount_old) * -1
-            expense = Expense(date_new, name, amount_new, "expense", "debit")
+            amount_old = re.match(r"\d+\.\d{2}", row[3])
+            if amount_old:
+                amount_new = float(amount_old.group()) * -1
+            expense = Expense(date_new, name, "Revolut", amount_new, "expense", "debit")
             return expense
 
+#separate json files for expenses and income
+#do i need income file?
 
 
 """
