@@ -222,8 +222,9 @@ class AquaTransaction(RowToObject):
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
         amount_old = re.match(r"\d+\.\d{2}", row[2])
-        if amount_old:
-            amount_new = float(amount_old.group()) * -1
+        if not amount_old:
+            return None    
+        amount_new = float(amount_old.group()) * -1
         expense = Expense(date_new, name, "Aqua", amount_new, "expense", "credit")
         return expense
 
@@ -235,8 +236,9 @@ class CapitalTransaction(RowToObject):
         if not row[3] == "":
 
             amount_old = re.match(r"\d+\.\d{2}", row[3])
-            if amount_old:
-                amount_new = float(amount_old.group()) * -1
+            if not amount_old:
+                return None
+            amount_new = float(amount_old.group()) * -1
             expense = Expense(date_new, name, "Capital", amount_new, "expense", "credit")
             return expense
 
@@ -254,16 +256,18 @@ class NatwestTransaction(RowToObject):
         if not row[2] == "":
 
             amount_old = re.match(r"\d+\.\d{2}", row[2])
-            if amount_old:
-                amount_new = float(amount_old.group())
+            if not amount_old:
+                return None
+            amount_new = float(amount_old.group())
             income = Income(self.last_date, name, "Natwest", amount_new)
             return income
         
         if not row[3] == "":
 
             amount_old = re.match(r"\d+\.\d{2}", row[3])
-            if amount_old:
-                amount_new = float(amount_old.group()) * -1
+            if not amount_old:
+                return None
+            amount_new = float(amount_old.group()) * -1
             expense = Expense(self.last_date, name, "Natwest", amount_new, "expense", "debit")
             return expense
         #need logic for replicating date for same day transactions
@@ -276,16 +280,18 @@ class NationwideTransaction(RowToObject):
         if not row[2] == "":
 
             amount_old = re.match(r"\d+\.\d{2}", row[2])
-            if amount_old:
-                amount_new = float(amount_old.group())
+            if not amount_old:
+                return None
+            amount_new = float(amount_old.group())
             income = Income(date_new, name, "Nationwide", amount_new)
             return income
         
         if not row[3] == "":
 
             amount_old = re.match(r"\d+\.\d{2}", row[3])
-            if amount_old:
-                amount_new = float(amount_old.group()) * -1
+            if not amount_old:
+                return None
+            amount_new = float(amount_old.group()) * -1
             expense = Expense(date_new, name, "Nationwide", amount_new, "expense", "debit")
             return expense
 
@@ -297,16 +303,18 @@ class RevolutTransaction(RowToObject):
         if not row[2] == "":
 
             amount_old = re.match(r"\d+\.\d{2}", row[2])
-            if amount_old:
-                amount_new = float(amount_old.group())
+            if not amount_old:
+                return None
+            amount_new = float(amount_old.group())
             income = Income(date_new, name, "Revolut", amount_new)
             return income
         
         if not row[3] == "":
 
             amount_old = re.match(r"\d+\.\d{2}", row[3])
-            if amount_old:
-                amount_new = float(amount_old.group()) * -1
+            if not amount_old:
+                return None
+            amount_new = float(amount_old.group()) * -1
             expense = Expense(date_new, name, "Revolut", amount_new, "expense", "debit")
             return expense
 
