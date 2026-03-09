@@ -176,7 +176,7 @@ class CapitalTableFilter(TableFilter):
 
 class NationwideTableFilter(TableFilter):
     def keep(self, list):
-        if re.search(r"\d+.\d{2}$", list[2]) or re.search(r"\d+.\d{2}$", list[3]):
+        if re.search(r"\d+\.\d{2}$", list[2]) or re.search(r"\d+\.\d{2}$", list[3]):
             return True
         else:
             return False
@@ -185,7 +185,7 @@ class NationwideTableFilter(TableFilter):
 
 class NatwestTableFilter(TableFilter):
     def keep(self, list):
-        if re.search(r"\d+.\d{2}$", list[2]) or re.search(r"\d+.\d{2}$", list[3]):
+        if re.search(r"\d+\.\d{2}$", list[2]) or re.search(r"\d+\.\d{2}$", list[3]):
             return True
         else:
             return False
@@ -275,6 +275,7 @@ class NatwestTransaction(RowToObject):
 class NationwideTransaction(RowToObject):
     def transaction(self, row):
         date_old = row[0]
+        #TODO implement logic for making the year of the date_new the current year (rollover from dec to jan???)
         date_new = datetime.strptime(date_old, "%d %b")
         name = row[1]
         if not row[2] == "":
