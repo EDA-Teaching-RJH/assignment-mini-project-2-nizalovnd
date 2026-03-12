@@ -55,7 +55,8 @@ def main():
 
     for bank, pdf_statement, pdf_settings, page_filter, table_filter, object_creator in statement_settings:
         pdf_path = statement_dir / pdf_statement
-        #TODO check exists
+        if not pdf_path.exists():
+            continue
 
         pdf = PDFProcessor(page_filter, pdf_settings)
         table = TableProcessor(table_filter)
@@ -64,13 +65,26 @@ def main():
 
         for page in processed_pages:
             for row in table.process(page):
-                transaction = object_creator.transaction(row)\
+                transaction = object_creator.transaction(row)
+                transaction_dict = {"date": transaction.date.strftime("%Y-%m-%d"),
+                                    "name": transaction.name,
+                                    "account": transaction.account,
+                                    "amount": transaction.amount}
                 if isinstance(transaction, Expense):
-                    expenses.append(transaction)
+                    transaction_dict["category"] = transaction.category
+                    transaction_dict["card_type"] = transaction.card_type
+                    expenses.append(transaction_dict)
                 elif isinstance(transaction, Income):
-                    incomes.append(transaction)
+                    incomes.append(transaction_dict)
                 else:
                     pass
         #TODO convert to dict form for json serialization
 
+        with open("expneses.json", "w") as file:
+            json.dump(expenses, file)
+
+        with open("incomes.json", "w") as file:
+            json.dump(incomes, file)
+
+        
 
