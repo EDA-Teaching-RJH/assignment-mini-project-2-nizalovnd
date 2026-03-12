@@ -67,6 +67,8 @@ def process_statements(pdf_name, pdf_settings, page_filter, table_filter, object
         for page in processed_pages:
             for row in table.process(page):
                 transaction = object_creator.transaction(row)
+                if transaction is None:
+                    continue
                 transaction_dict = {"date": transaction.date.strftime("%Y-%m-%d"),
                                     "name": transaction.name,
                                     "account": transaction.account,

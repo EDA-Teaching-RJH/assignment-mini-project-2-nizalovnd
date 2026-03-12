@@ -134,22 +134,30 @@ class TableFilter():
 
 class AquaTableFilter(TableFilter):
     def keep(self, list):
-        if re.search(r"^\d+\s[a-zA-Z]{3}\s20\d{2}",list[0]):
-            return True
+        if list and len(list) > 0 and list[0] is not None:
+            if re.search(r"^\d+\s[a-zA-Z]{3}\s20\d{2}",list[0]):
+                return True
+            else:
+                return False
         else:
             return False
-
 class CapitalTableFilter(TableFilter):
     def keep(self, list):
-        if re.search(r"^\d+\s[a-zA-Z]{3}",list[0]):
-            return True
+        if list and len(list) > 0 and list[0] is not None:
+            if re.search(r"^\d+\s[a-zA-Z]{3}",list[0]):
+                return True
+            else:
+                return False
         else:
             return False
 
 class NationwideTableFilter(TableFilter):
     def keep(self, list):
-        if re.search(r"\d+\.\d{2}$", list[2]) or re.search(r"\d+\.\d{2}$", list[3]):
-            return True
+        if list and len(list) > 3 and list[0] is not None:
+            if re.search(r"\d+\.\d{2}$", list[2]) or re.search(r"\d+\.\d{2}$", list[3]):
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -157,16 +165,22 @@ class NationwideTableFilter(TableFilter):
 
 class NatwestTableFilter(TableFilter):
     def keep(self, list):
-        if re.search(r"\d+\.\d{2}$", list[2]) or re.search(r"\d+\.\d{2}$", list[3]):
-            return True
+        if list and len(list) > 3 and list[0] is not None:
+            if re.search(r"\d+\.\d{2}$", list[2]) or re.search(r"\d+\.\d{2}$", list[3]):
+                return True
+            else:
+                return False
         else:
             return False
 
 
 class RevolutTableFilter(TableFilter):
     def keep(self, list):
-        if re.search(r"^\d+\s[a-zA-Z]{3}\s20\d{2}",list[0]):
-            return True
+        if list and len(list) > 0 and list[0] is not None:
+            if re.search(r"^\d+\s[a-zA-Z]{3}\s20\d{2}",list[0]):
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -190,7 +204,7 @@ class RowToObject():
 
 class AquaTransaction(RowToObject):
     def transaction(self, row):
-        date_old = row[0]
+        date_old = row[0].strip()
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
         amount_old = re.match(r"\d+\.\d{2}", row[2])
@@ -202,7 +216,7 @@ class AquaTransaction(RowToObject):
 
 class CapitalTransaction(RowToObject):
     def transaction(self, row):
-        date_old = row[0]
+        date_old = row[0].strip()
         date_new = datetime.strptime(date_old, "%d %b")
         name = row[1]
         if not row[3] == "":
@@ -221,7 +235,7 @@ class NatwestTransaction(RowToObject):
 
     def transaction(self, row):
         if row[0] != "":
-            self.last_date = datetime.strptime(row[0], "%d %b")
+            self.last_date = datetime.strptime(row[0].strip(), "%d %b")
         if self.last_date == None:
             return None
         name = row[1]
@@ -246,7 +260,7 @@ class NatwestTransaction(RowToObject):
 
 class NationwideTransaction(RowToObject):
     def transaction(self, row):
-        date_old = row[0]
+        date_old = row[0].strip()
         #TODO implement logic for making the year of the date_new the current year (rollover from dec to jan???)
         date_new = datetime.strptime(date_old, "%d %b")
         name = row[1]
@@ -270,7 +284,7 @@ class NationwideTransaction(RowToObject):
 
 class RevolutTransaction(RowToObject):
     def transaction(self, row):
-        date_old = row[0]
+        date_old = row[0].strip()
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
         if not row[2] == "":
