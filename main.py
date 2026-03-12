@@ -6,6 +6,7 @@ from statement_parse import *
 
 
 base_dir = Path.cwd()
+statement_dir = Path(base_dir / "statements")
 
 # for iteration through statements
 statement_settings = [("aqua", "aqua.pdf", settings_aqua, AquaFilter(), AquaTableFilter(), AquaTransaction()),
@@ -16,7 +17,7 @@ statement_settings = [("aqua", "aqua.pdf", settings_aqua, AquaFilter(), AquaTabl
 
 
 def file_rename():
-    dir_path = Path(base_dir/"statements")
+    dir_path = statement_dir
     for file in dir_path.iterdir():
         if not file.is_file():
             continue
@@ -47,4 +48,28 @@ def file_rename():
 
 
 def main():
+    expenses = []
+    incomes = []
     file_rename()
+
+    for bank, pdf_statement, pdf_settings, page_filter, table_filter, object_creator in statement_settings:
+        pdf_path = statement_dir / pdf_statement
+        #TODO check exists
+
+        pdf = PDFProcessor(page_filter, pdf_settings)
+        table = TableProcessor(table_filter)
+
+        processed_pages = pdf.process_pdf(pdf_path)
+
+        for page in processed_pages:
+            for row in table.process(page):
+                transaction = object_creator.transaction(row)\
+                if isinstance(transaction, Expense):
+                    expenses.append(transaction)
+                elif isinstance(transaction, Income):
+                    incomes.append(transaction)
+                else:
+                    pass
+        #TODO convert to dict form for json serialization
+        
+
