@@ -7,6 +7,7 @@ from statement_parse import *
 
 base_dir = Path.cwd()
 statement_dir = Path(base_dir / "statements")
+output_dir = Path(base_dir / "output")
 
 # for iteration through statements
 statement_settings = [("aqua", "aqua.pdf", settings_aqua, AquaFilter(), AquaTableFilter(), AquaTransaction()),
@@ -71,5 +72,5 @@ def main():
                 else:
                     pass
         #TODO convert to dict form for json serialization
-        
+
 
