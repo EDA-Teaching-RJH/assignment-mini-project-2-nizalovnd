@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-base_dir = Path.cwd()
+
 
 
 settings_aqua = {
@@ -67,35 +67,7 @@ class Expense(Transaction):
         self.category = category
         self.card_type = card_type
 
-def file_rename():
-    dir_path = Path(base_dir/"statements")
-    for file in dir_path.iterdir():
-        if not file.is_file():
-            continue
-        elif re.search(r"\Aaccount",file.name):
-            #revolut
-            new_name = dir_path / "revolut.pdf"
-            file.rename(new_name)
-        elif re.search(r"\d{4}-\d{2}-\d{2}",file.name):
-            #aqua
-            new_name = dir_path / "aqua.pdf"
-            file.rename(new_name)
-        elif re.search(r"\d{4}_\d{2}_\d{2}",file.name):
-            #capital_one
-            new_name = dir_path / "capital_one.pdf"
-            file.rename(new_name)
-        
-        elif re.search(r"\d{4}\sStatement.pdf\Z",file.name):
-            #nationwide
-            new_name = dir_path / "nationwide.pdf"
-            file.rename(new_name)
-        elif re.search(r"\bStatement",file.name):
-            #natwest
-            new_name = dir_path / "natwest.pdf"
-            file.rename(new_name)
-        else:
-            print("Unknown Statement")
-            continue
+
 
 class PageFilter():
     def keep(self, page):
