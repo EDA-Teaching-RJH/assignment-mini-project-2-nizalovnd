@@ -49,12 +49,14 @@ def file_rename():
             continue
 
 
-def process_statements(pdf_path, pdf_settings, page_filter, table_filter, object_creator ):
+def process_statements(pdf_name, pdf_settings, page_filter, table_filter, object_creator ):
     
     
         expenses = []
         incomes = []
-    
+        pdf_path = statement_dir / pdf_name
+        if not pdf_path.exists():
+            return incomes, expenses
         
 
         pdf = PDFProcessor(page_filter, pdf_settings)
@@ -90,19 +92,18 @@ def main():
 
     with Pool(processes=5) as pool:
 
-        for pdf_statement, pdf_settings, page_filter, table_filter, object_creator in statement_settings:
-            pdf_path = statement_dir / pdf_statement
-            if not pdf_path.exists():
-                continue
+   #     for pdf_statement, pdf_settings, page_filter, table_filter, object_creator in statement_settings:
+            
+   
         results = pool.starmap(process_statements, statement_settings)
             
        # expenses =  [expenses for _, expenses in results]
         #final_expenses = [*e for e in expenses]
-        expenses = [e for _, expenses in results for e in expenses]
-        incomes = [i for incomes, _ in results for i in incomes]
+    expenses = [e for _, expenses in results for e in expenses]
+    incomes = [i for incomes, _ in results for i in incomes]
 
 
-    with open("expneses.json", "w") as file:
+    with open("expenses.json", "w") as file:
             json.dump(expenses, file)
 
     with open("incomes.json", "w") as file:
