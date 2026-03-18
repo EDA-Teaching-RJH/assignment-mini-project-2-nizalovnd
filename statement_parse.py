@@ -205,9 +205,11 @@ class RowToObject():
 class AquaTransaction(RowToObject):
     def transaction(self, row):
         date_old = row[0].strip()
+        if not date_old:
+            return None
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
-        amount_old = re.match(r"\d+\.\d{2}", row[2])
+        amount_old = re.search(r"\d+\.\d{2}", row[2])
         if not amount_old:
             return None    
         amount_new = float(amount_old.group()) * -1
@@ -217,6 +219,8 @@ class AquaTransaction(RowToObject):
 class CapitalTransaction(RowToObject):
     def transaction(self, row):
         date_old = row[0].strip()
+        if not date_old:
+            return None
         date_new = datetime.strptime(date_old, "%d %b")
         name = row[1]
         if not row[3] == "":
@@ -261,6 +265,8 @@ class NatwestTransaction(RowToObject):
 class NationwideTransaction(RowToObject):
     def transaction(self, row):
         date_old = row[0].strip()
+        if not date_old:
+            return None
         #TODO implement logic for making the year of the date_new the current year (rollover from dec to jan???)
         date_new = datetime.strptime(date_old, "%d %b")
         name = row[1]
@@ -285,11 +291,13 @@ class NationwideTransaction(RowToObject):
 class RevolutTransaction(RowToObject):
     def transaction(self, row):
         date_old = row[0].strip()
+        if not date_old:
+            return None
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
         if not row[2] == "":
 
-            amount_old = re.match(r"\d+\.\d{2}", row[2])
+            amount_old = re.search(r"\d+\.\d{2}", row[2])
             if not amount_old:
                 return None
             amount_new = float(amount_old.group())
