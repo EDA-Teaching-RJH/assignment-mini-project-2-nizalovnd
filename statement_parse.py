@@ -270,18 +270,18 @@ class NationwideTransaction(RowToObject):
         #TODO implement logic for making the year of the date_new the current year (rollover from dec to jan???)
         date_new = datetime.strptime(date_old, "%d %b")
         name = row[1]
-        if not row[2] == "":
+        if not row[3] == "":
 
-            amount_old = re.match(r"\d+\.\d{2}", row[2])
+            amount_old = re.match(r"\d+\.\d{2}", row[3])
             if not amount_old:
                 return None
             amount_new = float(amount_old.group())
             income = Income(date_new, name, "Nationwide", amount_new)
             return income
         
-        if not row[3] == "":
+        if not row[2] == "":
 
-            amount_old = re.match(r"\d+\.\d{2}", row[3])
+            amount_old = re.match(r"\d+\.\d{2}", row[2])
             if not amount_old:
                 return None
             amount_new = float(amount_old.group()) * -1
@@ -295,18 +295,18 @@ class RevolutTransaction(RowToObject):
             return None
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
-        if not row[2] == "":
+        if not row[3] == "":
 
-            amount_old = re.search(r"\d+\.\d{2}", row[2])
+            amount_old = re.search(r"\d+\.\d{2}", row[3])
             if not amount_old:
                 return None
             amount_new = float(amount_old.group())
             income = Income(date_new, name, "Revolut", amount_new)
             return income
         
-        if not row[3] == "":
+        if not row[2] == "":
 
-            amount_old = re.match(r"\d+\.\d{2}", row[3])
+            amount_old = re.search(r"\d+\.\d{2}", row[2])
             if not amount_old:
                 return None
             amount_new = float(amount_old.group()) * -1
