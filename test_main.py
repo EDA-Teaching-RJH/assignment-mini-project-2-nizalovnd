@@ -1,7 +1,12 @@
 from main import file_rename, process_statements, bubble_sort, main
 
 def test_file_rename():
-    pass
+    assert ("aqua.pdf").exists()
+    assert ("revolut.pdf").exists()
+    assert ("capital_one.pdf").exists()
+    assert ("nationwide.pdf").exists()
+    assert ("natwest.pdf").exists()
+    #TODO find out how to mock statement subdir and mock the pdf files to rename
 
 def test_process_statements():
     pass
