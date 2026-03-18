@@ -84,7 +84,12 @@ def process_statements(pdf_name, pdf_settings, page_filter, table_filter, object
         return incomes, expenses
         #TODO convert to dict form for json serialization
 
-        
+def bubble_sort(transaction_list):
+    for n in range(len(transaction_list)):
+        for i in range(0, len(transaction_list) - n - 1):
+            if datetime.strptime(transaction_list[i]["date"],"%Y-%m-%d")  > datetime.strptime(transaction_list[i + 1]["date"], "%Y-%m-%d"):
+                transaction_list[i], transaction_list[i+1] = transaction_list[i+1], transaction_list[i]
+    return transaction_list
 
         
 def main():
@@ -104,9 +109,15 @@ def main():
     expenses = [e for _, expenses in results for e in expenses]
     incomes = [i for incomes, _ in results for i in incomes]
 
+    expenses = bubble_sort(expenses)
+    incomes = bubble_sort(incomes)
+
 
     with open("expenses.json", "w") as file:
-            json.dump(expenses, file)
+        json.dump(expenses, file)
 
     with open("incomes.json", "w") as file:
         json.dump(incomes, file)
+
+if __name__ == "__main__":
+    main()
