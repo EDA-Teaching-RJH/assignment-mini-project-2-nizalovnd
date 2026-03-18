@@ -205,10 +205,13 @@ class RowToObject():
 class AquaTransaction(RowToObject):
     def transaction(self, row):
         date_old = row[0].strip()
+        
         if not date_old:
             return None
         date_new = datetime.strptime(date_old, "%d %b %Y")
         name = row[1]
+        if "Payment Received" in name:
+            return None
         amount_old = re.search(r"\d+\.\d{2}", row[2])
         if not amount_old:
             return None    
