@@ -1,12 +1,11 @@
 import pdfplumber
-import json
 import re
+
 from datetime import datetime
-from pathlib import Path
 
 
 
-
+#settings for pdfplumber table_extract to process the 5 different bank statements 
 settings_aqua = {
     "vertical_strategy": "explicit",
     "horizontal_strategy": "lines",
@@ -47,7 +46,7 @@ settings_revolut = {
     "intersection_y_tolerance": 10,
     "explicit_horizontal_lines": [ 732 ]
 }
-
+#parent class for all transactions
 class Transaction():
     def __init__(self, date, name, account, amount):
         self.date = date
@@ -55,11 +54,12 @@ class Transaction():
         self.account = account
         self.amount = amount
 
+#Income objects created for each transaction where money is added
 class Income(Transaction):
     def __init__(self, date, name, account, amount):
         super().__init__(date, name, account, amount)
         
-
+#Expense object created for each transaction where money waas spent
 class Expense(Transaction):
     def __init__(self, date, name, account, amount, category, card_type):
         super().__init__(date, name, account, amount)
@@ -68,11 +68,12 @@ class Expense(Transaction):
         self.card_type = card_type
 
 
-
+#Parent class for filters to skip pages of the statement without any transactions before passing to pdfplumber table_extract
 class PageFilter():
     def keep(self, page):
         pass
 
+#filters by key phrases present on specific in the statement
 class AquaFilter(PageFilter):
     def keep(self, page, i):
         if i == 0:
@@ -83,7 +84,7 @@ class AquaFilter(PageFilter):
         else:
             return True
 
-        
+#filter by page number       
 class CapitalFilter(PageFilter):
     def keep(self, page, i):
         if i == 0:
@@ -91,6 +92,7 @@ class CapitalFilter(PageFilter):
         else:
             return True
         
+ #filters by key phrases present on specific pages in the statement       
 class NationwideFilter(PageFilter):
     def keep(self, page, i):
         page_text = page.extract_text()
@@ -99,6 +101,7 @@ class NationwideFilter(PageFilter):
         else:
             return True
 
+#filters by key phrases present on specific pages in the statement    
 class NatwestFilter(PageFilter):
     def keep(self, page, i):
         page_text = page.extract_text()
@@ -106,10 +109,13 @@ class NatwestFilter(PageFilter):
             return False
         else:
             return True
+        
+#revolut statements have transactions on every page, but filter exists for consistency
 class RevolutFilter(PageFilter):
     def keep(self, page, i):
         return True
 
+#class for extracting data from table form in the statement and returns the list of lists(rows)
 class PDFProcessor():
     def __init__ (self, filter: PageFilter, table_settings):
         self.filter = filter
@@ -127,7 +133,7 @@ class PDFProcessor():
 
         return intermediate_list
 
-
+#parent class for filterring out rows in the extracted table that do not contain wanted transactions. Each child class uses unique regex.
 class TableFilter():
     def keep(self, list):
         pass
@@ -184,6 +190,7 @@ class RevolutTableFilter(TableFilter):
         else:
             return False
 
+#class for filtering out the unwanted rows of the original extracted table. Takes in list of lists, filters, and returns list of lists.
 class TableProcessor():
     def __init__(self, filter: TableFilter):
         self.filter = filter
@@ -197,7 +204,8 @@ class TableProcessor():
                 intermediate_list.append(sublist)
         return intermediate_list
 
-
+#parent class for creating Income/Expense objects from lists of lists. Functions as a way to standardise the format of transactions from different banks.
+#each child class uses unique regex and strptime formats
 class RowToObject():
     def transaction(self, row) -> Transaction:
         pass
@@ -236,11 +244,10 @@ class CapitalTransaction(RowToObject):
             expense = Expense(date_new, name, "Capital", amount_new, "expense", "credit")
             return expense
 
+#this clss needs to persists over all transactions in the natwest statement, so that there is a variable last seen date that can fill in the date for transactions that have the date cell blank
 class NatwestTransaction(RowToObject):
-    #this clss needs to persists over all transactions in the natwest statement, so that there is a variable last seen date that can fill in the date for transactions that have the date cell blank
     def __init__(self):
         self.last_date = None
-
     def transaction(self, row):
         if row[0] != "":
             current_year = datetime.now().year
@@ -265,14 +272,12 @@ class NatwestTransaction(RowToObject):
             amount_new = float(amount_old.group()) * -1
             expense = Expense(self.last_date, name, "Natwest", amount_new, "expense", "debit")
             return expense
-        #need logic for replicating date for same day transactions
 
 class NationwideTransaction(RowToObject):
     def transaction(self, row):
         date_old = row[0].strip()
         if not date_old:
             return None
-        #TODO year rollovr logic????
         current_year = datetime.now().year
         date_new = datetime.strptime(date_old, "%d %b").replace(year=current_year)
         name = row[1]
@@ -319,17 +324,6 @@ class RevolutTransaction(RowToObject):
             expense = Expense(date_new, name, "Revolut", amount_new, "expense", "debit")
             return expense
 
-#separate json files for expenses and income
-#do i need income file?
-
-
-"""
-        try:
-            with open(json_filename, "w") as file:
-                json.dump(intermediate_list, file, )
-        except IOError:
-            print("Error writing json file")
-"""
 
 
 
