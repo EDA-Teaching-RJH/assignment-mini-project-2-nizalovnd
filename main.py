@@ -10,14 +10,14 @@ base_dir = Path.cwd()
 statement_dir = Path(base_dir / "statements")
 output_dir = Path(base_dir / "output")
 
-# for iteration through statements
+#settings for iteration through statements
 statement_settings = [( "aqua.pdf", settings_aqua, AquaFilter(), AquaTableFilter(), AquaTransaction()),
                       ("capital_one.pdf", settings_capital, CapitalFilter(), CapitalTableFilter(), CapitalTransaction()),
                        ("nationwide.pdf", settings_nationwide, NationwideFilter(), NationwideTableFilter(), NationwideTransaction()),
                        ("natwest.pdf", settings_natwest, NatwestFilter(), NatwestTableFilter(), NatwestTransaction()),
                        ("revolut.pdf", settings_revolut, RevolutFilter(), RevolutTableFilter(), RevolutTransaction())]
 
-
+#uses regex to rename the files into a more indetifiable name
 def file_rename():
     dir_path = statement_dir
     for file in dir_path.iterdir():
@@ -48,7 +48,7 @@ def file_rename():
             print("Unknown Statement")
             continue
 
-
+#input pdf statements and returns two unified list of dicts of incomes and expenses
 def process_statements(pdf_name, pdf_settings, page_filter, table_filter, object_creator ):
     
     
@@ -82,8 +82,8 @@ def process_statements(pdf_name, pdf_settings, page_filter, table_filter, object
                 else:
                     pass
         return incomes, expenses
-        #TODO convert to dict form for json serialization
 
+#sorts the transactions by transaction date using the bubble sort algorhythm which is 0[n^2] time complexity. Using the inbuilt sort or sorted functions would be more efficient.
 def bubble_sort(transaction_list):
     for n in range(len(transaction_list)):
         for i in range(0, len(transaction_list) - n - 1):
@@ -91,27 +91,21 @@ def bubble_sort(transaction_list):
                 transaction_list[i], transaction_list[i+1] = transaction_list[i+1], transaction_list[i]
     return transaction_list
 
-        
+#the main function aggregates all of the above functions, using multiprocessing to process each banks statement in individual process.
+# At the scale of more bank statements this would improve efficiency.
+# The function then creates two json files of expenses and incomes in the output folder.       
 def main():
-    
     
     file_rename()
 
-    with Pool(processes=5) as pool:
-
-   #     for pdf_statement, pdf_settings, page_filter, table_filter, object_creator in statement_settings:
-            
-   
+    with Pool(processes=5) as pool:         
         results = pool.starmap(process_statements, statement_settings)
-            
-       # expenses =  [expenses for _, expenses in results]
-        #final_expenses = [*e for e in expenses]
+       
     expenses = [e for _, expenses in results for e in expenses]
     incomes = [i for incomes, _ in results for i in incomes]
 
     expenses = bubble_sort(expenses)
     incomes = bubble_sort(incomes)
-
 
     with open("expenses.json", "w") as file:
         json.dump(expenses, file)
@@ -119,5 +113,6 @@ def main():
     with open("incomes.json", "w") as file:
         json.dump(incomes, file)
 
+#ensures main is run from the current file
 if __name__ == "__main__":
     main()
