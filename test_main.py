@@ -1,6 +1,14 @@
+import pytest
+
 from main import file_rename, process_statements, bubble_sort, main
 
+from unittest.mock import patch
+
 def test_file_rename():
+    fake_file = fake_path / file
+    fake_file.touch()
+    with patch.object(main, "statemet_dir", fake_path):
+        main.file_rename()
     assert ("aqua.pdf").exists()
     assert ("revolut.pdf").exists()
     assert ("capital_one.pdf").exists()
