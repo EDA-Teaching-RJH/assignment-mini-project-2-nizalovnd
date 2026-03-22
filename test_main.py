@@ -14,7 +14,7 @@ def rename_helper_func(fake_path, filename):
     fake_file = fake_path / filename
     fake_file.touch()
     with patch.object(main_script, "statement_dir", fake_path):
-        main_script.file_rename()
+        file_rename()
 
 
 #tests the file_rename function 
@@ -34,11 +34,6 @@ def test_file_rename(tmp_path):
     assert (tmp_path / "unknown_file.pdf").exists()
 
 
-def process_helper_func(fake_path, filename):
-    fake_file = fake_path / filename
-    fake_file.touch()
-    with patch.object(main_script, "statement_dir", fake_path):
-        main_script.file_rename()
 
 def test_process_statements(tmp_path):
     fake_file = tmp_path / "aqua.pdf"
@@ -103,14 +98,13 @@ def test_bubble_sort():
     assert bubble_sort([{"date": "2026-01-08", "name": "Foreign Exchange Conversion Charge", "account": "Aqua", "amount": -0.35, "category": "expense", "card_type": "credit"}, {"date": "2026-01-09", "name": "Millevoglie Venezia ITA\nCurrency conversion rate 4,00 EUR @ 1.1494", "account": "Aqua", "amount": -3.48, "category": "expense", "card_type": "credit"}, {"date": "2026-01-10", "name": "Foreign Exchange Conversion Charge", "account": "Aqua", "amount": -1.0, "category": "expense", "card_type": "credit"} ]) == [{"date": "2026-01-08", "name": "Foreign Exchange Conversion Charge", "account": "Aqua", "amount": -0.35, "category": "expense", "card_type": "credit"},{"date": "2026-01-09", "name": "Millevoglie Venezia ITA\nCurrency conversion rate 4,00 EUR @ 1.1494", "account": "Aqua", "amount": -3.48, "category": "expense", "card_type": "credit"}, {"date": "2026-01-10", "name": "Foreign Exchange Conversion Charge", "account": "Aqua", "amount": -1.0, "category": "expense", "card_type": "credit"} ]
     assert bubble_sort([{"date": "2026-01-09", "name": "Millevoglie Venezia ITA\nCurrency conversion rate 4,00 EUR @ 1.1494", "account": "Aqua", "amount": -3.48, "category": "expense", "card_type": "credit"}, {"date": "2026-01-10", "name": "Foreign Exchange Conversion Charge", "account": "Aqua", "amount": -1.0, "category": "expense", "card_type": "credit"}, {"date": "2026-01-08", "name": "Foreign Exchange Conversion Charge", "account": "Aqua", "amount": -0.35, "category": "expense", "card_type": "credit"}]) == [{"date": "2026-01-08", "name": "Foreign Exchange Conversion Charge", "account": "Aqua", "amount": -0.35, "category": "expense", "card_type": "credit"},{"date": "2026-01-09", "name": "Millevoglie Venezia ITA\nCurrency conversion rate 4,00 EUR @ 1.1494", "account": "Aqua", "amount": -3.48, "category": "expense", "card_type": "credit"}, {"date": "2026-01-10", "name": "Foreign Exchange Conversion Charge", "account": "Aqua", "amount": -1.0, "category": "expense", "card_type": "credit"} ]
    
-def test_main():
-    """
-    mock the multiprocessing (pool)
-    mock json.dump
-    mock process_statements
-    mock file_rename
-    
-    assert doesn't crash????
+def test_main(tmp_path):
 
-    """
+    mock_pool = MagicMock()
+    mock_pool.__enter__.return_value = mock_pool
+    mock_pool.starmap.return_value = [([],[])] * 5
+
+    with patch("main.file_rename"), patch("main.Pool", return_value = mock_pool), patch("json.dump"), patch("builtins.open", MagicMock()):
+        main()
+    
 
