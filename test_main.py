@@ -77,8 +77,6 @@ def test_process_statements(tmp_path):
 
     with patch.object(main_script, "statement_dir", tmp_path), patch("main.PDFProcessor", return_value = mock_pdf_processor), patch("main.TableProcessor", return_value = mock_table_processor):
         
-        
-
         incomes, expenses = main_script.process_statements("revolut.pdf", main_script.settings_revolut, mock_page_filter, mock_table_filter, mock_object_creator)
 
     assert expenses[0]["date"] == "2026-03-05"
